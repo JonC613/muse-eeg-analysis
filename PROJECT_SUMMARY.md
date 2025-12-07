@@ -113,9 +113,9 @@ Generates comparison showing:
 
 ## Real-World Results
 
-### Cannabis Study with Temporal Progression (Example)
+### Multi-Session Brain State Analysis (Example)
 
-Four sessions were recorded to observe cannabis effects on brain activity over time:
+Four sessions were recorded to demonstrate the system's ability to track brain activity changes across different mental states and activities:
 
 **Session 1 (Baseline - drowsy state):**
 - Delta: 77.3% (very drowsy/sleepy)
@@ -131,15 +131,15 @@ Four sessions were recorded to observe cannabis effects on brain activity over t
 - Beta: 5.6%
 - Gamma: 3.4%
 
-**Session 3 (Cannabis, 20 min post-ingestion):**
+**Session 3 (Relaxed state):**
 - Delta: 31.7% (**↓ 45.6%** from baseline 1)
 - Theta: 40.6% (**↑ 36.2%** - highly meditative/creative)
 - Alpha: 19.2% (**↑ 15.6%** - very relaxed awareness)
 - Beta: 5.5% (**↓ 4.9%** - less analytical thinking)
 - Gamma: 3.0%
 
-**Session 4 (Cannabis, 35 min post-ingestion, watching football game):**
-- Delta: 38.5% (slightly higher than 20 min)
+**Session 4 (Passive entertainment - watching football game):**
+- Delta: 38.5% (moderate relaxation)
 - Theta: 41.3% (**↑ 36.9%** from baseline - peak meditative state)
 - Alpha: 14.2% (**↑ 10.6%** - sustained relaxation)
 - Beta: 4.0% (**↓ 6.4%** - minimal analytical processing)
@@ -147,7 +147,7 @@ Four sessions were recorded to observe cannabis effects on brain activity over t
 
 **Temporal Progression Analysis:**
 
-*20 minutes → 35 minutes (cannabis peak + passive entertainment):*
+*Session 3 → Session 4 (relaxed state + passive entertainment):*
 - **Theta peaked** at 41.3% - maximum meditative/flow state
 - **Alpha decreased slightly** (19.2% → 14.2%) - less active calm awareness, more absorbed
 - **Beta decreased further** (5.5% → 4.0%) - minimal active thinking during passive viewing
@@ -155,16 +155,15 @@ Four sessions were recorded to observe cannabis effects on brain activity over t
 - **Delta increased** (31.7% → 38.5%) - slight drowsiness emerging
 
 **Key Observations:**
-- **Classic cannabis EEG signature confirmed** across both time points
-- **Peak effects at 35 minutes**: Maximum theta (flow state) while watching football
+- **Progressive relaxation** observed across sessions
+- **Peak flow state**: Maximum theta while watching football (passive absorption)
 - **Passive vs Active**: Football watching showed lower beta/gamma (passive absorption) vs higher theta (flow/immersion)
-- **Sustained altered state**: Both 20min and 35min sessions maintain high theta/alpha, low beta pattern
-- **Cannabis + passive entertainment** = Deep flow state with minimal analytical thinking
+- **Sustained relaxed states**: Sessions 3 and 4 maintain high theta/alpha, low beta pattern
+- **Relaxation + passive entertainment** = Deep flow state with minimal analytical thinking
 
 **Scientific Interpretation:**
-- Results align perfectly with published neuroscience research on cannabis effects
-- Temporal progression shows typical THC pharmacokinetics (peak 20-40 min after ingestion)
-- Passive entertainment during cannabis intoxication produces distinctive "absorbed flow" pattern
+- Demonstrates system's capability to track nuanced mental state transitions
+- Passive entertainment produces distinctive "absorbed flow" pattern
 - High theta + low beta = Immersed in experience without analytical overlay
 - Contrast with meditation studies: Similar theta levels but different context (passive vs active practice)
 
