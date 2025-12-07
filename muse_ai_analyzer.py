@@ -201,9 +201,9 @@ Be specific, cite the actual numbers, and provide actionable insights."""
             print(insight)
             print("=" * 60)
             
-            # Save insights to file
+            # Save insights to file (same directory as CSV)
             output_file = self.csv_file.with_suffix('.ai_insights.txt')
-            with open(output_file, 'w') as f:
+            with open(output_file, 'w', encoding='utf-8') as f:
                 f.write(f"Muse S Session AI Analysis\n")
                 f.write(f"Session: {self.csv_file.name}\n")
                 f.write(f"Model: {model}\n")

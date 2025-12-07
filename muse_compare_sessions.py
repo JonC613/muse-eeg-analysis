@@ -218,8 +218,9 @@ def create_comparison_plot(sessions):
     
     plt.tight_layout()
     
-    # Save plot
-    output_file = Path('recordings') / 'session_comparison.png'
+    # Save plot in the same directory as the first CSV file
+    first_csv = Path(csv_files[0])
+    output_file = first_csv.parent / 'session_comparison.png'
     plt.savefig(output_file, dpi=150, bbox_inches='tight')
     print(f"\n✓ Comparison plot saved to: {output_file}")
     

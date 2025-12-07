@@ -55,10 +55,15 @@ class MuseRecorder:
             print("\nFailed to connect to Muse. Exiting...")
             return None
         
+        # Create date-based folder structure
+        current_date = datetime.now()
+        date_folder = self.output_dir / current_date.strftime("%Y-%m-%d")
+        date_folder.mkdir(exist_ok=True)
+        
         # Generate filename
         if session_name is None:
-            session_name = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = self.output_dir / f"muse_session_{session_name}.csv"
+            session_name = current_date.strftime("%Y%m%d_%H%M%S")
+        filename = date_folder / f"muse_session_{session_name}.csv"
         
         print(f"\n✓ Recording for {duration} seconds...")
         print(f"✓ Saving to: {filename}")
