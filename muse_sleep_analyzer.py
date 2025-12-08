@@ -19,7 +19,16 @@ class MuseSleepAnalyzer:
         self.csv_file = Path(csv_file)
         print(f"Loading sleep data from: {self.csv_file}")
         self.df = pd.read_csv(csv_file)
-        self.duration_hours = self.df['timestamp'].max() / 3600
+        
+        # Handle both old and new timestamp formats
+        if 'elapsed_time' in self.df.columns:
+            time_col = 'elapsed_time'
+        elif 'timestamp' in self.df.columns:
+            time_col = 'timestamp'
+        else:
+            raise ValueError("No timestamp column found (need 'elapsed_time' or 'timestamp')")
+        
+        self.duration_hours = self.df[time_col].max() / 3600
         print(f"✓ Loaded {len(self.df)} samples ({self.duration_hours:.1f} hours)")
         
         # Sleep stage thresholds (based on EEG research)
@@ -33,7 +42,14 @@ class MuseSleepAnalyzer:
     def _calculate_band_powers_windowed(self, window_seconds=30, fs=256):
         """Calculate band powers in time windows."""
         eeg_data = self.df['eeg_af7'].dropna().values
-        window_size = int(window_seconds * (len(eeg_data) / self.df['timestamp'].max()))
+        
+        # Handle both timestamp formats
+        if 'elapsed_time' in self.df.columns:
+            time_col = 'elapsed_time'
+        else:
+            time_col = 'timestamp'
+        
+        window_size = int(window_seconds * (len(eeg_data) / self.df[time_col].max()))
         hop_size = window_size // 2  # 50% overlap
         
         bands = {
@@ -52,8 +68,12 @@ class MuseSleepAnalyzer:
             
             if time_idx >= len(self.df):
                 break
-                
-            timestamp = self.df.iloc[time_idx]['timestamp']
+            
+            # Get timestamp (handle both formats)
+            if 'elapsed_time' in self.df.columns:
+                timestamp = self.df.iloc[time_idx]['elapsed_time']
+            else:
+                timestamp = self.df.iloc[time_idx]['timestamp']
             
             # FFT analysis
             fft_vals = np.fft.rfft(segment)
@@ -163,7 +183,7 @@ class MuseSleepAnalyzer:
         if len(first_rem_idx) > 0:
             metrics['rem_latency_minutes'] = stages_df.iloc[first_rem_idx[0]]['timestamp'] / 60
         else:
-            metrics['rem_latency_minutes'] = None
+            metrics['rem_latency_minutes'] = 0.0  # Default to 0 instead of None
         
         # Deep sleep percentage (quality indicator)
         metrics['deep_sleep_quality'] = metrics['Deep Sleep']['percentage']
