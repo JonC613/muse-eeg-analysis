@@ -27,6 +27,14 @@ Thumbs.db
 *.ai_insights.txt
 *.png
 
+# Credentials and tokens (NEVER commit these!)
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+fitbit_credentials.json
+fitbit_tokens.json
+
 # Jupyter
 .ipynb_checkpoints/
 
