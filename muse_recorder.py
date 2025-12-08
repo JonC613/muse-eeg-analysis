@@ -10,6 +10,7 @@ import time
 from datetime import datetime
 import matplotlib.pyplot as plt
 from pathlib import Path
+import winsound  # For audio notifications on Windows
 
 
 class MuseRecorder:
@@ -23,7 +24,9 @@ class MuseRecorder:
         
         self.is_recording = False
         self.data = {
-            'timestamp': [],
+            'timestamp_unix': [],      # Unix epoch timestamp (seconds since 1970-01-01)
+            'timestamp_iso': [],       # ISO 8601 format for human readability
+            'elapsed_time': [],        # Seconds since recording started
             'eeg_tp9': [],
             'eeg_af7': [],
             'eeg_af8': [],
@@ -60,10 +63,14 @@ class MuseRecorder:
         date_folder = self.output_dir / current_date.strftime("%Y-%m-%d")
         date_folder.mkdir(exist_ok=True)
         
-        # Generate filename
+        # Generate filename with timestamp
+        timestamp_str = current_date.strftime("%Y%m%d_%H%M%S")
         if session_name is None:
-            session_name = current_date.strftime("%Y%m%d_%H%M%S")
-        filename = date_folder / f"muse_session_{session_name}.csv"
+            # If no session name, use just the timestamp
+            filename = date_folder / f"muse_session_{timestamp_str}.csv"
+        else:
+            # If session name provided, append timestamp to it
+            filename = date_folder / f"muse_session_{session_name}_{timestamp_str}.csv"
         
         print(f"\n✓ Recording for {duration} seconds...")
         print(f"✓ Saving to: {filename}")
@@ -75,7 +82,8 @@ class MuseRecorder:
         
         try:
             while time.time() - start_time < duration:
-                current_time = time.time() - start_time
+                current_time_unix = time.time()
+                elapsed_time = current_time_unix - start_time
                 
                 # Read all sensors
                 eeg = self.muse.read_eeg_sample()
@@ -83,8 +91,10 @@ class MuseRecorder:
                 gyro = self.muse.read_gyro_sample()
                 acc = self.muse.read_acc_sample()
                 
-                # Store data
-                self.data['timestamp'].append(current_time)
+                # Store timestamps in multiple formats for cross-platform sync
+                self.data['timestamp_unix'].append(current_time_unix)
+                self.data['timestamp_iso'].append(datetime.fromtimestamp(current_time_unix).isoformat())
+                self.data['elapsed_time'].append(elapsed_time)
                 
                 if eeg and eeg['channels']:
                     self.data['eeg_tp9'].append(eeg['tp9'] or 0)
@@ -135,18 +145,55 @@ class MuseRecorder:
         
         finally:
             self.is_recording = False
+            # Play completion sound
+            self._play_completion_sound()
         
         # Save to CSV
         print(f"\n✓ Recording complete! Collected {sample_count} samples")
         print(f"✓ Saving data...")
         
         df = pd.DataFrame(self.data)
+        
+        # Add metadata as comments in a separate file for easy sync
+        metadata_file = filename.with_suffix('.metadata.json')
+        import json
+        metadata = {
+            'session_name': session_name,
+            'start_time_unix': start_time,
+            'start_time_iso': datetime.fromtimestamp(start_time).isoformat(),
+            'duration_seconds': duration,
+            'sample_count': sample_count,
+            'device': 'Muse S',
+            'sampling_rate_hz': sample_count / duration if duration > 0 else 0,
+            'data_columns': list(self.data.keys())
+        }
+        with open(metadata_file, 'w') as f:
+            json.dump(metadata, f, indent=2)
+        
         df.to_csv(filename, index=False)
         
         print(f"✓ Saved to: {filename}")
+        print(f"✓ Metadata: {metadata_file}")
         print(f"✓ File size: {filename.stat().st_size / 1024:.1f} KB")
+        print(f"✓ Session started: {datetime.fromtimestamp(start_time).strftime('%Y-%m-%d %H:%M:%S')}")
         
         return filename
+    
+    def _play_completion_sound(self):
+        """Play an audio notification when recording is complete."""
+        try:
+            # Play a pleasant completion sound (3 ascending beeps)
+            frequencies = [800, 1000, 1200]  # Hz
+            duration = 200  # milliseconds
+            
+            for freq in frequencies:
+                winsound.Beep(freq, duration)
+                time.sleep(0.05)  # Small pause between beeps
+            
+            print("🔔 Recording complete!")
+        except Exception as e:
+            # If sound fails, just continue (e.g., on systems without speaker)
+            pass
 
 
 class MuseAnalyzer:

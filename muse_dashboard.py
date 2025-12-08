@@ -56,6 +56,7 @@ class MuseDashboard:
         
         # Sampling info
         self.start_time = None
+        self.start_time_unix = None  # Unix epoch timestamp for sync
         self.is_running = False
         self.data_thread = None
         
@@ -102,6 +103,7 @@ class MuseDashboard:
     def collect_data(self):
         """Background thread to collect data from Muse."""
         self.start_time = time.time()
+        self.start_time_unix = self.start_time  # Store Unix epoch for sync
         sample_count = 0
         
         while self.is_running:

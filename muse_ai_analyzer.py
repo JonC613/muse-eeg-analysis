@@ -27,10 +27,29 @@ class MuseAIAnalyzer:
         self.llm_type = llm_type.lower()
         print(f"Loading data from: {self.csv_file}")
         self.df = pd.read_csv(csv_file)
-        print(f"✓ Loaded {len(self.df)} samples ({self.df['timestamp'].max():.1f} seconds)")
+        
+        # Handle both old and new timestamp formats
+        if 'elapsed_time' in self.df.columns:
+            time_col = 'elapsed_time'
+        elif 'timestamp' in self.df.columns:
+            time_col = 'timestamp'
+        else:
+            raise ValueError("No timestamp column found in CSV file")
+        
+        print(f"✓ Loaded {len(self.df)} samples ({self.df[time_col].max():.1f} seconds)")
     
     def calculate_metrics(self):
         """Calculate key metrics from the session."""
+        # Determine which timestamp column to use
+        if 'elapsed_time' in self.df.columns:
+            time_col = 'elapsed_time'
+        elif 'timestamp' in self.df.columns:
+            time_col = 'timestamp'
+        else:
+            time_col = None
+        
+        duration_seconds = self.df[time_col].max() if time_col else len(self.df) / 256
+        
         # EEG statistics
         eeg_channels = ['eeg_tp9', 'eeg_af7', 'eeg_af8', 'eeg_tp10']
         eeg_stats = {}
@@ -64,7 +83,7 @@ class MuseAIAnalyzer:
         ppg_std = float(self.df['ppg_avg'].std())
         
         return {
-            'duration_seconds': float(self.df['timestamp'].max()),
+            'duration_seconds': float(duration_seconds),
             'total_samples': len(self.df),
             'eeg_statistics': eeg_stats,
             'band_powers': band_powers,

@@ -98,6 +98,9 @@ def compare_sessions(*csv_files):
 def create_comparison_plot(sessions):
     """Create visual comparison of sessions."""
     
+    # Extract session filenames for saving the plot
+    csv_files = [s['file'] for s in sessions]
+    
     fig = plt.figure(figsize=(16, 10))
     fig.suptitle('Muse S Session Comparison', fontsize=16, fontweight='bold')
     
