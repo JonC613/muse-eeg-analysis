@@ -1,5 +1,5 @@
 """
-Muse S AI-Powered Analyzer using Ollama or LM Studio
+Muse S AI-Powered Analyzer using LM Studio
 Analyzes EEG data and provides insights using local LLM
 """
 
@@ -11,20 +11,18 @@ import requests
 
 
 class MuseAIAnalyzer:
-    """Analyze Muse S data using Ollama or LM Studio LLM for insights."""
+    """Analyze Muse S data using LM Studio LLM for insights."""
     
-    def __init__(self, csv_file, llm_url="http://localhost:11434", llm_type="ollama"):
+    def __init__(self, csv_file, llm_url="http://192.168.68.123:1234"):
         """
-        Initialize with CSV file and LLM URL.
+        Initialize with CSV file and LM Studio URL.
         
         Args:
             csv_file: Path to CSV file
-            llm_url: URL of LLM server (default: http://localhost:11434 for Ollama)
-            llm_type: 'ollama' or 'lmstudio' (default: 'ollama')
+            llm_url: URL of LM Studio server (default: http://192.168.68.123:1234)
         """
         self.csv_file = Path(csv_file)
         self.llm_url = llm_url
-        self.llm_type = llm_type.lower()
         print(f"Loading data from: {self.csv_file}")
         self.df = pd.read_csv(csv_file)
         
@@ -127,10 +125,10 @@ class MuseAIAnalyzer:
         
         return band_powers
     
-    def get_ollama_insights(self, model="llama3.2"):
-        """Get AI insights using Ollama or LM Studio."""
+    def get_lmstudio_insights(self, model="openai/gpt-oss-20b"):
+        """Get AI insights using LM Studio."""
         print(f"\n{'='*60}")
-        print(f"Analyzing with {self.llm_type.upper()} ({model})...")
+        print(f"Analyzing with LM Studio ({model})...")
         print(f"{'='*60}\n")
         
         # Calculate metrics
@@ -170,50 +168,28 @@ Please provide a detailed analysis covering:
 Be specific, cite the actual numbers, and provide actionable insights."""
 
         try:
-            # Call LLM API
-            if self.llm_type == "lmstudio":
-                # LM Studio uses OpenAI-compatible API
-                response = requests.post(
-                    f"{self.llm_url}/v1/chat/completions",
-                    json={
-                        "model": model,
-                        "messages": [
-                            {"role": "system", "content": "You are an expert neuroscientist analyzing EEG brainwave data."},
-                            {"role": "user", "content": prompt}
-                        ],
-                        "temperature": 0.7,
-                        "max_tokens": 2000
-                    },
-                    timeout=120
-                )
-                
-                if response.status_code == 200:
-                    result = response.json()
-                    insight = result['choices'][0]['message']['content']
-                else:
-                    print(f"Error: LM Studio returned status {response.status_code}")
-                    print(response.text)
-                    return None
-                    
+            # Call LM Studio API (OpenAI-compatible)
+            response = requests.post(
+                f"{self.llm_url}/v1/chat/completions",
+                json={
+                    "model": model,
+                    "messages": [
+                        {"role": "system", "content": "You are an expert neuroscientist analyzing EEG brainwave data."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    "temperature": 0.7,
+                    "max_tokens": 2000
+                },
+                timeout=120
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                insight = result['choices'][0]['message']['content']
             else:
-                # Ollama API
-                response = requests.post(
-                    f"{self.llm_url}/api/generate",
-                    json={
-                        "model": model,
-                        "prompt": prompt,
-                        "stream": False
-                    },
-                    timeout=120
-                )
-                
-                if response.status_code == 200:
-                    result = response.json()
-                    insight = result.get('response', 'No response from model')
-                else:
-                    print(f"Error: Ollama returned status {response.status_code}")
-                    print(response.text)
-                    return None
+                print(f"Error: LM Studio returned status {response.status_code}")
+                print(response.text)
+                return None
             
             print("AI INSIGHTS")
             print("=" * 60)
@@ -238,21 +214,15 @@ Be specific, cite the actual numbers, and provide actionable insights."""
             return insight
                 
         except requests.exceptions.ConnectionError:
-            if self.llm_type == "lmstudio":
-                print(f"❌ Could not connect to LM Studio at {self.llm_url}")
-                print("   Make sure LM Studio is running and serving on the correct port:")
-                print("   1. Open LM Studio")
-                print("   2. Load a model")
-                print("   3. Start the local server (Developer tab)")
-                print(f"   4. Verify URL: {self.llm_url}")
-            else:
-                print(f"❌ Could not connect to Ollama at {self.llm_url}")
-                print("   1. Install Ollama from https://ollama.ai")
-                print("   2. Run: ollama serve")
-                print(f"   3. Pull model: ollama pull {model}")
+            print(f"❌ Could not connect to LM Studio at {self.llm_url}")
+            print("   Make sure LM Studio is running and serving on the correct port:")
+            print("   1. Open LM Studio")
+            print("   2. Load a model")
+            print("   3. Start the local server (Developer tab)")
+            print(f"   4. Verify URL: {self.llm_url}")
             return None
         except Exception as e:
-            print(f"Error calling {self.llm_type}: {e}")
+            print(f"Error calling LM Studio: {e}")
             return None
     
     def get_quick_summary(self):
@@ -306,42 +276,31 @@ def main():
     
     if len(sys.argv) < 2:
         print("Usage:")
-        print("  python muse_ai_analyzer.py <csv_file> [model] [--lmstudio [url]]")
-        print("\nExamples (Ollama - default):")
+        print("  python muse_ai_analyzer.py <csv_file> [model] [url]")
+        print("\nExamples:")
         print("  python muse_ai_analyzer.py recordings\\muse_session_20231206_120000.csv")
-        print("  python muse_ai_analyzer.py recordings\\muse_session_20231206_120000.csv llama3.2")
-        print("\nExamples (LM Studio):")
-        print("  python muse_ai_analyzer.py recordings\\muse_session_20231206_120000.csv model_name --lmstudio")
-        print("  python muse_ai_analyzer.py recordings\\muse_session_20231206_120000.csv model_name --lmstudio http://192.168.1.100:1234")
+        print("  python muse_ai_analyzer.py recordings\\muse_session_20231206_120000.csv openai/gpt-oss-20b")
+        print("  python muse_ai_analyzer.py recordings\\muse_session_20231206_120000.csv openai/gpt-oss-20b http://192.168.1.100:1234")
         return
     
     csv_file = sys.argv[1]
-    model = "llama3.2"
-    llm_type = "ollama"
-    llm_url = "http://localhost:11434"
+    model = "openai/gpt-oss-20b"
+    llm_url = "http://192.168.68.123:1234"
     
     # Parse arguments
-    i = 2
-    while i < len(sys.argv):
-        arg = sys.argv[i]
-        if arg == "--lmstudio":
-            llm_type = "lmstudio"
-            llm_url = "http://localhost:1234"
-            if i + 1 < len(sys.argv) and not sys.argv[i + 1].startswith("--"):
-                llm_url = sys.argv[i + 1]
-                i += 1
-        elif not arg.startswith("--"):
-            model = arg
-        i += 1
+    if len(sys.argv) > 2:
+        model = sys.argv[2]
+    if len(sys.argv) > 3:
+        llm_url = sys.argv[3]
     
-    analyzer = MuseAIAnalyzer(csv_file, llm_url=llm_url, llm_type=llm_type)
+    analyzer = MuseAIAnalyzer(csv_file, llm_url=llm_url)
     
     # Always show quick summary
     analyzer.get_quick_summary()
     
     # Try AI insights
     print(f"\nAttempting AI analysis with {model}...")
-    analyzer.get_ollama_insights(model=model)
+    analyzer.get_lmstudio_insights(model=model)
 
 
 if __name__ == "__main__":
