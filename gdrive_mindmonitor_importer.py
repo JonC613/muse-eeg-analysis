@@ -85,8 +85,8 @@ class GoogleDriveImporter:
             return []
         
         try:
-            # Build query
-            query = "name contains 'muse' or name contains 'mind' or name contains '.csv'"
+            # Build query - only Mind Monitor ZIP files
+            query = "name contains 'mindMonitor' and name contains '.zip'"
             if folder_id:
                 query += f" and '{folder_id}' in parents"
             
@@ -102,18 +102,24 @@ class GoogleDriveImporter:
             
             files = results.get('files', [])
             
-            if not files:
+            # Filter to only Mind Monitor ZIP files
+            mind_monitor_files = [
+                f for f in files 
+                if 'mindMonitor' in f['name'] and f['name'].endswith('.zip')
+            ]
+            
+            if not mind_monitor_files:
                 print("No Mind Monitor files found")
                 return []
             
-            print(f"\nFound {len(files)} file(s):")
+            print(f"\nFound {len(mind_monitor_files)} Mind Monitor file(s):")
             print("-" * 80)
-            for i, file in enumerate(files, 1):
+            for i, file in enumerate(mind_monitor_files, 1):
                 size_mb = int(file.get('size', 0)) / 1024 / 1024
                 modified = file.get('modifiedTime', 'Unknown')[:10]
                 print(f"{i}. {file['name']:<50} {size_mb:>6.2f} MB  {modified}")
             
-            return files
+            return mind_monitor_files
         
         except Exception as e:
             print(f"Error listing files: {e}")
@@ -336,35 +342,21 @@ class GoogleDriveImporter:
                 temp_path.unlink()  # Delete temp file
                 return converted
         else:
-            # List and select files
+            # List files and automatically grab latest
             files = self.list_mind_monitor_files()
             
             if not files:
                 return None
             
-            print("\nEnter file number to import (or 'all' for all files): ", end="")
-            choice = input().strip()
-            
-            if choice.lower() == 'all':
-                for file in files:
-                    temp_path = Path(f"temp_{file['name']}")
-                    downloaded = self.download_file(file['id'], temp_path)
-                    if downloaded:
-                        self.convert_mind_monitor_to_muse(downloaded)
-                        temp_path.unlink()
-            else:
-                try:
-                    idx = int(choice) - 1
-                    if 0 <= idx < len(files):
-                        file = files[idx]
-                        temp_path = Path(f"temp_{file['name']}")
-                        downloaded = self.download_file(file['id'], temp_path)
-                        if downloaded:
-                            converted = self.convert_mind_monitor_to_muse(downloaded)
-                            temp_path.unlink()
-                            return converted
-                except:
-                    print("Invalid selection")
+            # Automatically select latest file (first in list, sorted by modifiedTime desc)
+            print(f"\n✓ Auto-selecting latest: {files[0]['name']}")
+            file = files[0]
+            temp_path = Path(f"temp_{file['name']}")
+            downloaded = self.download_file(file['id'], temp_path)
+            if downloaded:
+                converted = self.convert_mind_monitor_to_muse(downloaded)
+                temp_path.unlink()
+                return converted
 
 
 def main():

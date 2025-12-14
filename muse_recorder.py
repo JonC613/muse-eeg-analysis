@@ -133,12 +133,14 @@ class MuseRecorder:
                 sample_count += 1
                 
                 # Progress update
-                if sample_count % 100 == 0:
+                if sample_count % 256 == 0:  # Update every second at 256Hz
                     elapsed = time.time() - start_time
                     remaining = duration - elapsed
-                    print(f"  {elapsed:.1f}s / {duration}s | Samples: {sample_count} | Remaining: {remaining:.1f}s")
+                    sample_rate = sample_count / elapsed if elapsed > 0 else 0
+                    print(f"  {elapsed:.1f}s / {duration}s | Samples: {sample_count} | Rate: {sample_rate:.1f}Hz | Remaining: {remaining:.1f}s")
                 
-                time.sleep(0.01)  # 100Hz sampling
+                # No sleep - read as fast as LSL provides data (256Hz from Muse S)
+                # The LSL inlet will naturally pace the loop at the device's sample rate
         
         except KeyboardInterrupt:
             print("\n\nRecording stopped by user")
