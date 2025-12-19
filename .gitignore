@@ -1,6 +1,3 @@
-# Recordings - session data
-recordings/
-
 # Python
 __pycache__/
 *.py[cod]
@@ -23,8 +20,7 @@ ENV/
 Thumbs.db
 
 # Data files
-*.csv
-*.ai_insights.txt
+# Keep recordings CSVs and insights in git
 *.png
 
 # Credentials and tokens (NEVER commit these!)
