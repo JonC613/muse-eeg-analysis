@@ -81,6 +81,10 @@ If you can't connect to the Muse:
 
 ## Notes
 
+## Privacy
+
+This repository contains reusable integration and analysis code only. Generated recordings, exports, research notes, credentials, and analysis artifacts are intentionally excluded from version control. Use synthetic data for demos and never commit personal biometric or location data.
+
 - The app uses Lab Streaming Layer (LSL) protocol
 - Default monitoring duration is 30 seconds
 - Press Ctrl+C to stop monitoring early

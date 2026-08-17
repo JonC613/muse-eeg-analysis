@@ -19,9 +19,14 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# Data files
-# Keep recordings CSVs and insights in git
+# Personal data and generated analysis artifacts
+recordings/
+research/
+exports/
+*.csv
 *.png
+*.pdf
+*.txt
 
 # Credentials and tokens (NEVER commit these!)
 *.json
